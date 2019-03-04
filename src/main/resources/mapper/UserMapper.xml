@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.rabbitmq.bean.User">
+    <resultMap id="userMap" type="springboot.demo.bean.User">
+        <id property="id" column="ID" jdbcType="INTEGER"/>
+        <result property="name" column="NAME" jdbcType="VARCHAR"/>
+        <result property="age" column="AGE" jdbcType="INTEGER"/>
+        <result property="sex" column="SEX" jdbcType="VARCHAR"/>
+    </resultMap>
+
+</mapper>

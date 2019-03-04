@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- scan="true"开启对配置信息的自动扫描(默认时间为60秒扫描一次) 注:当此文件的配置信息发生变化时,此设置的作用就体现出来了,不需要重启服务 -->
+<configuration scan="true" scanPeriod="60 seconds">
+	<contextName>SpringBootDemo</contextName>
+	
+	<property name="PATTERN" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) |-%-5level [%thread] %c [%L] -| %msg%n" />
+	
+	<property name="FILE_PATH" value="D:/Logs" />
+
+	<!-- class:加载指定类(ch.qos.logback.core.ConsoleAppender类会将日志输出到>>>控制台 -->
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<!--  class:加载指定类(ch.qos.logback.core.rolling.RollingFileAppender类会将日志输出到>>>指定的文件中), -->
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- 把日志文件输出到:项目启动的目录下的log文件夹(无则自动创建)下 -->
+		<file></file>
+		<!-- TimeBasedRollingPolicy策略会将过时的日志，另存到指定的文件中(无该文件则创建) -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${FILE_PATH}/info.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- 本人这里:保存以最后一次日志为准,往前100天以内的日志文件 -->
+			<maxHistory>100</maxHistory>
+		</rollingPolicy>
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>10MB</maxFileSize>
+		</triggeringPolicy>
+		
+		<encoder>
+			<pattern>${PATTERN}</pattern>
+		</encoder>
+	</appender>
+	<!-- 日志记录器，日期滚动记录 -->
+	<appender name="REQUEST_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- 正在记录的日志文件的路径及文件名 -->
+		<file></file>
+		<!-- 归档的日志文件的路径，例如今天是2013-12-21日志，当前写的日志文件路径为file节点指定，可以将此文件与file指定文件路径设置为不同路径，从而将当前日志文件或归档日志文件置不同的目录。
+            而2013-12-21的日志文件在由fileNamePattern指定。%d{yyyy-MM-dd}指定日期格式，%i指定索引 -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${FILE_PATH}/request.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>100</maxHistory>
+		</rollingPolicy>
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>10MB</maxFileSize>
+		</triggeringPolicy>
+		
+		<encoder>
+			<pattern>${PATTERN}</pattern>
+		</encoder>
+	</appender>
+	
+	
+	<appender name="EXCEPTION_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file></file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"> 
+			<fileNamePattern>${FILE_PATH}/request.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>100</maxHistory>
+		</rollingPolicy>
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>10MB</maxFileSize>
+		</triggeringPolicy>
+		
+		<encoder>
+			<pattern>${PATTERN}</pattern>
+		</encoder>
+	</appender>
+	
+	<logger name="REQUEST_LOGGER">
+		<appender-ref ref="REQUEST_FILE"></appender-ref>
+	</logger>
+	
+	<logger name="EXCEPTION_LOGGER">
+		<appender-ref ref="EXCEPTION_FILE"></appender-ref>
+	</logger>
+	
+	<root level="INFO">
+		<appender-ref ref="FILE"></appender-ref>
+		<appender-ref ref="CONSOLE"></appender-ref>
+	</root>
+</configuration>
