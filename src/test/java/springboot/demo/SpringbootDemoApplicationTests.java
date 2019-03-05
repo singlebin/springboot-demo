@@ -1,5 +1,6 @@
 package springboot.demo;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +15,7 @@ import springboot.demo.annotation.FruitInfoUtil;
 import springboot.demo.bean.Apple;
 import springboot.demo.bean.User;
 import springboot.demo.mapper.UserMapper;
+import springfox.documentation.spring.web.json.Json;
 
 import java.util.List;
 import java.util.UUID;
@@ -134,7 +136,11 @@ public class SpringbootDemoApplicationTests {
     @Test
     public void test5(){
         logger.info("进入logbackTest方法了！");
-        }
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        List<User> users = userMapper.selectList(wrapper);
+        //System.out.println(JSONArray.toJSON(users));
+        logger.info("结果为："+JSONArray.toJSON(users));
+    }
 
 }
 

@@ -23,10 +23,10 @@ public class HelloController {
     @CrossOrigin
     @ApiOperation(value = "hello")
     @RequestMapping(value = "/hello",method = RequestMethod.GET)
-    public ResponseBean sayHello(){
-        System.out.println(10/0);
+    public ResponseBean sayHello(String name){
+        System.out.println("====="+name);
         //ResponseBean responseBean=new ResponseBean(true,UnicomResponseEnums.SUCCESS_OPTION);
-        return new ResponseBean(false, "hehe" , UnicomResponseEnums.ILLEGAL_ARGUMENT);
+        return new ResponseBean(true, "hehe" , UnicomResponseEnums.LOGIN_SUCCESS);
     }
 
 }

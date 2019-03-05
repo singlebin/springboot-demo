@@ -45,6 +45,7 @@ mybatis-plus:
       field-strategy: 2
       table-underline: true
 
-
+logging:
+  config: classpath:config/logback.xml
 server:
   port: 9999
