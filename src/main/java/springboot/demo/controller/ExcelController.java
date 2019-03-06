@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springboot.demo.bean.User;
-import springboot.demo.excel.ExcelUtiles;
 import springboot.demo.mapper.UserMapper;
+import springboot.demo.util.ExcelUtiles;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
@@ -29,8 +29,8 @@ public class ExcelController {
     @Autowired
     UserMapper userMapper;
 
-    @GetMapping("/export")
-    public void export(HttpServletResponse response){
+    @GetMapping("/exportTest")
+    public void exportTest(HttpServletResponse response){
         System.out.println("1   ");
         int[] a = {1, 2};
         List<Integer> ids = Arrays.stream(a).boxed().collect(Collectors.toList());

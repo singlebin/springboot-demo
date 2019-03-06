@@ -2,6 +2,7 @@ package springboot.demo;
 
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import io.swagger.models.auth.In;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -140,6 +141,16 @@ public class SpringbootDemoApplicationTests {
         List<User> users = userMapper.selectList(wrapper);
         //System.out.println(JSONArray.toJSON(users));
         logger.info("结果为："+JSONArray.toJSON(users));
+    }
+
+    @Test
+    public void test6(){
+        Integer a = 127;
+        Integer b = 127;
+        Integer c = 128;
+        Integer d = 128;
+        System.out.println(a ==b);
+        System.out.println(c ==d);
     }
 
 }
