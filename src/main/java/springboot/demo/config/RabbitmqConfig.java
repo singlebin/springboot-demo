@@ -21,10 +21,10 @@ public class RabbitmqConfig {
         return new Jackson2JsonMessageConverter();
     }
 
-    @Bean
+    /*@Bean
     public MultipartConfigElement multipartConfigElement() {
         MultipartConfigFactory factory = new MultipartConfigFactory();
         factory.setMaxFileSize(1024L * 1024L);
         return factory.createMultipartConfig();
-    }
+    }*/
 }
