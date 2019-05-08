@@ -52,13 +52,14 @@ public class CompletableFuturTest {
         },executorService);
         String s = "2";
 
-        CompletableFuture<Void> allFuture = CompletableFuture.allOf(futureA, futureB, futureC, futureD);
-        allFuture.join();
+//        CompletableFuture<Void> allFuture = CompletableFuture.allOf(futureA, futureB, futureC, futureD);
+//        allFuture.join();
         //CompletableFuture<Object> allFuture = CompletableFuture.anyOf(futureA, futureB, futureC, futureD);
         //allFuture.join();
         System.out.println(futureA.get() +","+ futureB.get() +","+ futureC.get() +","+ futureD.get());
-        System.out.println("=========="+allFuture.join());
+        //System.out.println("=========="+allFuture.join());
         System.out.println("总耗时:" + (System.currentTimeMillis() - start));
+
     }
 
 

@@ -1,8 +1,19 @@
 package springboot.demo;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import io.swagger.models.auth.In;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import io.searchbox.client.JestClient;
+import io.searchbox.core.Index;
+import io.searchbox.core.Search;
+import io.searchbox.core.SearchResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -15,17 +26,25 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.context.junit4.SpringRunner;
 import springboot.demo.annotation.FruitInfoUtil;
 import springboot.demo.bean.Apple;
+import springboot.demo.bean.Apple1;
+import springboot.demo.bean.Article;
 import springboot.demo.bean.User;
+import springboot.demo.elasticsearch.BookRepository;
 import springboot.demo.mapper.UserMapper;
 import springboot.demo.service.AsyncService;
+import springboot.demo.service.IMessageProducerMQService;
 import springboot.demo.service.UserService;
-import springfox.documentation.spring.web.json.Json;
+import springboot.demo.util.MatrixToImageWriter;
+import springboot.demo.util.MultiThreadUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -38,13 +57,18 @@ public class SpringbootDemoApplicationTests {
     RabbitTemplate rabbitTemplate;
     @Autowired
     Environment env;
-    @Autowired
-    ThreadPoolTaskExecutor taskExecutor;
+//    @Autowired
+//    ThreadPoolTaskExecutor taskExecutor;
     @Autowired
     AsyncService asyncService;
     @Autowired
     UserService userService;
-
+    @Autowired
+    JestClient jestClient;
+    @Autowired
+    BookRepository bookRepository;
+    @Autowired
+    IMessageProducerMQService iMessageProducerMQService;
 
     @Test
     public void contextLoads() {
@@ -106,24 +130,25 @@ public class SpringbootDemoApplicationTests {
 
     @Test
     public void receive(){
-        rabbitTemplate.receiveAndConvert("queue.test.4");
+            rabbitTemplate.receiveAndConvert("queue.test.4");
     }
 
     @Test
     public void Test1(){
-        long t1 = System.currentTimeMillis();
-        List<User> list = new ArrayList<>();
-        for(int i=172040 ;i<200000; i++){
-            User user = new User();
-            user.setAge(i);
-            user.setName("test"+i+"");
-            user.setSex("1");
-            list.add(user);
-        }
-
-        userService.saveBatch(list);
-        long t2 = System.currentTimeMillis();
-        System.out.println("耗时："+(t2-t1));
+//        long t1 = System.currentTimeMillis();
+//        List<User> list = new ArrayList<>();
+//        for(int i=172040 ;i<200000; i++){
+//            User user = new User();
+//            user.setAge(i);
+//            user.setName("test"+i+"");
+//            user.setSex("1");
+//            list.add(user);
+//        }
+//
+//        userService.saveBatch(list);
+//        long t2 = System.currentTimeMillis();
+//        System.out.println("耗时："+(t2-t1));
+        iMessageProducerMQService.sendMessage("hehe");
     }
     @Test
     public void Test2(){
@@ -203,6 +228,7 @@ public class SpringbootDemoApplicationTests {
     public void Test7(){
         //创建ExecutorService，并且通过它向线程池提交任务
         ExecutorService executorService = Executors.newCachedThreadPool();
+        Executors.newFixedThreadPool(1);
         //向线程池提交任务
         Callable<Double> callable = new Callable<Double>() {
             @Override
@@ -268,7 +294,9 @@ public class SpringbootDemoApplicationTests {
 
     }
 
-
+    /**
+     * 测试CompletableFuture中thenApplyAsync方法：将futureB结果作为futureC的入参
+     */
     @Test
     public void test8(){
         CompletableFuture<String> futureA = CompletableFuture.supplyAsync(() -> "任务A");
@@ -282,6 +310,155 @@ public class SpringbootDemoApplicationTests {
 
     }
 
+    @Test
+    public void test9(){
+        String[] arrays = {"a", "b", "c", "d", "e"};
+        List<String> collect = Arrays.stream(arrays).collect(Collectors.toList());
+        List<String> stringList = collect.subList(0, 3);
+        System.out.println(JSONArray.toJSON("============"+stringList));
+    }
+
+    /**
+     * 给elasticsearch中保存一个文档(jest)
+     */
+    @Test
+    public void test10() {
+        Article article = new Article();
+        article.setId(1);
+        article.setAuthor("wub");
+        article.setContent("hello world");
+        article.setTitle("good news");
+        //构建一个索引
+        Index build = new Index.Builder(article).index("atguigu").type("news").build();
+        try {
+            jestClient.execute(build);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 测试elasticsearch搜索(jest)
+     */
+    @Test
+    public void test11(){
+    String json = "{\n" +
+            "    \"query\" : {\n" +
+            "        \"match\" : {\n" +
+            "            \"content\" : \"hello\"\n" +
+            "        }\n" +
+            "    }\n" +
+            "}";
+        Search search = new Search.Builder(json).addIndex("atguigu").addType("news").build();
+        try {
+            SearchResult execute = jestClient.execute(search);
+            System.out.println("================"+execute.getJsonString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void test12(){
+//        Book book = new Book();
+//        book.setId(1);
+//        book.setAuthor("wub");
+//        book.setBookName("互联网的时代");
+//        bookRepository.index(book);
+        //List<Book> books = bookRepository.findByBookNameLike("的");
+        //books.forEach(System.out::println);
+        Optional<Object> empty = Optional.empty();
+
+        //2、创建对象，如果str对象为null，则会抛出NullPointException
+        String str = null;
+        Optional<String> optStr = Optional.of(str);
+        Optional<String> optStrNotNull = Optional.ofNullable(str);
+        System.out.println(optStrNotNull);
+
+    }
+    
+    @Test
+    public void test13(){
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        List<User> users = userMapper.selectList(wrapper);
+        MultiThreadUtils<User> threadUtils = MultiThreadUtils.newInstance(5);
+
+    }
+
+    /**
+     * 生成二维码
+     * @throws Exception
+     */
+    @Test
+    public void test14() throws  Exception{
+//        int width = 300;
+//        int height = 300;
+//        String format = "png";
+//        String content = "Dear,HeYunQiu,When you see this thing, it means that I have succeeded, my wife, I love you!";
+//        //定义二维码的参数
+//        HashMap hints = new HashMap();
+//        hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+//        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
+//        hints.put(EncodeHintType.MARGIN,2 );
+//
+//        //设置
+//        BitMatrix bitMatrix = new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height);
+//        File file = new File("D:/何韵秋.png");
+//
+//        MatrixToImageWriter.writeToFile(bitMatrix, format, file);
+
+        List<String> ids = new ArrayList<>();
+        ids.add("1");
+        ids.add("2");
+        JSONArray jsonArray = new JSONArray(Collections.singletonList(ids));
+        String s = jsonArray.toJSONString();
+        System.out.println("==============="+s);
+
+        System.out.println(new ObjectMapper().writeValueAsString(ids));
+
+
+    }
+
+    /**
+     * Stream API提供了两个静态方法来从函数生成流：Stream.iterate和Stream.generate
+     */
+    @Test
+    public void test15(){
+        Stream.iterate(0,n->n+2)
+                .limit(5).parallel()
+                .forEach(t ->{
+                    System.out.println(t);
+                });
+
+    }
+
+    @Test
+    public void test16(){
+        List<Apple1> appleList = new ArrayList<>();//存放apple对象集合
+
+        Apple1 apple1 =  new Apple1(1,"苹果1",new BigDecimal("3.25"),10);
+        Apple1 apple12 = new Apple1(1,"苹果2",new BigDecimal("1.35"),20);
+        Apple1 apple2 =  new Apple1(2,"香蕉",new BigDecimal("2.89"),30);
+        Apple1 apple3 =  new Apple1(3,"荔枝",new BigDecimal("9.99"),40);
+
+        appleList.add(apple1);
+        appleList.add(apple12);
+        appleList.add(apple2);
+        appleList.add(apple3);
+        //如果对象的id一样，则生成的map取第一条
+        //Map<Integer, Apple1> appleMap = appleList.stream().collect(Collectors.toMap(Apple1::getId, a -> a,(k1,k2)->k1));
+        //根据id分组
+        Map<Integer, List<Apple1>> groupBy = appleList.stream().collect(Collectors.groupingBy(Apple1::getId));
+        System.out.println("==============="+JSONObject.toJSON(groupBy));
+
+    }
+
+    @Test
+    public void testBuild(){
+        Apple1 build = Apple1.builder().name("1").num(1).build();
+        System.out.println("========"+build);
+
+    }
 
     public int getClassCount(int id) {
         try {

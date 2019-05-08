@@ -2,7 +2,7 @@
 spring:
   rabbitmq:
     #addresses: 10.0.4.140:5672, 10.0.4.143:5672
-    addresses: 10.0.4.14:5672, 10.0.4.18:5672, 10.0.4.19:5672
+    #addresses: 10.0.4.14:5672, 10.0.4.18:5672, 10.0.4.19:5672
     username: mq
     password: mq
     virtual-host: /
@@ -12,6 +12,7 @@ spring:
     #      direct:
     #        acknowledge-mode: manual
     #addresses: 172.16.1.101:5672
+    host: 10.0.4.14
 
   #数据库配置
   datasource:
@@ -34,7 +35,14 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       bootstrap-servers: 10.0.4.14:9092,10.0.4.18:9092,10.0.4.19:9092
-
+  #elasticsearch配置
+  elasticsearch:
+    jest:
+      uris: http://10.0.4.8:9200
+  data:
+    elasticsearch:
+      cluster-name: es
+      cluster-nodes: 10.0.4.8:9300
 #mytabis-plus 配置
 mybatis-plus:
   mapper-locations: classpath:/mapper/*Mapper.xml

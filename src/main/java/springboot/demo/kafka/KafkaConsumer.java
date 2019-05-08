@@ -14,7 +14,7 @@ import java.util.Optional;
 @Component
 public class KafkaConsumer {
 
-    //@KafkaListener(topics = "my-topic1")
+    @KafkaListener(topics = "my-topic1", groupId = "my-topic1")
     public void receive(ConsumerRecord<?,?> consumerRecord){
 
         Optional<?> kafkaMessqge = Optional.ofNullable(consumerRecord.value());
@@ -23,4 +23,5 @@ public class KafkaConsumer {
             System.out.println("kafka接受到的消息："+message);
         }
     }
+
 }
