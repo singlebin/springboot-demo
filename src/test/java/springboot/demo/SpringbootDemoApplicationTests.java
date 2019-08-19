@@ -14,6 +14,8 @@ import io.searchbox.client.JestClient;
 import io.searchbox.core.Index;
 import io.searchbox.core.Search;
 import io.searchbox.core.SearchResult;
+import io.swagger.models.auth.In;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -40,6 +42,7 @@ import springboot.demo.util.MultiThreadUtils;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.security.Key;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
@@ -455,9 +458,49 @@ public class SpringbootDemoApplicationTests {
 
     @Test
     public void testBuild(){
-        Apple1 build = Apple1.builder().name("1").num(1).build();
-        System.out.println("========"+build);
+//        List<Apple1> list = new ArrayList<>();
+//        for (int i = 0; i< 4; i++){
+//            Apple1 build = Apple1.builder().name(String.valueOf(i)).num(i).build();
+//            list.add(build);
+//        }
+//
+//        System.out.println("========"+JSON.toJSONString(list));
+       Map<String, List<Integer>> map = new HashMap<>();
+       map.put("1",null );
+//       map.put("2",2 );
+//       map.put("3", 3);
+        //Object key2 = map.computeIfAbsent("key", k -> new Object());
+//        Integer integer = map.computeIfAbsent("3", key -> new Integer(4));
+//        Integer integer1 =  map.computeIfAbsent("4", key->new Integer(4) );
+       map.computeIfAbsent("3", v -> new ArrayList<>()).add(new Integer(1));
 
+
+
+    }
+
+    @Test
+    public void testBoolen(){
+        List<String> list1 = new ArrayList();
+        list1.add("1111");
+        list1.add("2222");
+        list1.add("3333");
+        list1.add("4444");
+        list1.add("5555");
+        list1.add("1111");
+        //去重
+        List uniqueStr = list1.stream().distinct().collect(Collectors.toList());
+        System.out.println("list1为："+JSON.toJSONString(uniqueStr));
+
+        List<String> list2 = new ArrayList();
+        list2.add("3333");
+        list2.add("4444");
+        // 差集 (list1 - list2)
+        List<String> reduce1 = list1.stream().filter(item -> !list2.contains(item)).collect(Collectors.toList());
+        System.out.println("---得到差集 reduce1 (list1 - list2)---"+JSON.toJSONString(reduce1));
+
+        User u = new User();
+        User user = u.setSex("男");
+        System.out.println("user为："+JSON.toJSONString(user));
     }
 
     public int getClassCount(int id) {

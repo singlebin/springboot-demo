@@ -23,4 +23,13 @@ public class ScheduledService {
     public  void hello(){
         System.out.println("hello ... ");
     }
+
+    //@Scheduled(cron = "0 */5 * * * ?") //每隔5分钟执行一次
+    //@Scheduled(cron = "0 0 1 * * ?") //每天凌晨1点执行
+//    public void  execute(){
+//        LogUtil.info("-------定时任务同步商品信息(价格等)，开始时间：" + DateUtils.formatDateTime(new Date()));
+//        productEsFeignclient.productSync();
+//        //LogUtil.info("同步商品信息(价格等)结果："+result.getData());
+//        LogUtil.info("-------同步商品信息(价格等)，结束时间：" + DateUtils.formatDateTime(new Date()));
+//    }
 }

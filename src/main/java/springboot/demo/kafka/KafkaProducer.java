@@ -23,7 +23,7 @@ public class KafkaProducer {
     @Autowired
     KafkaTemplate kafkaTemplate;
 
-    //@Scheduled(cron = "00/1 * * * * ?")
+    @Scheduled(cron = "00/60 * * * * ?")
     public void send() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         String message = UUID.randomUUID().toString();
