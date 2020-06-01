@@ -25,4 +25,5 @@ public class AsyncService {
         LoggerFactory.getLogger(AsyncService.class).info(res);
         return new AsyncResult<>(res);
     }
+
 }

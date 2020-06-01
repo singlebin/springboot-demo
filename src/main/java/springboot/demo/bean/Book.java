@@ -1,13 +1,16 @@
 package springboot.demo.bean;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.elasticsearch.annotations.Document;
+import lombok.NoArgsConstructor;
 
 @Data
-@Document(indexName = "atguigu",type = "book")
+//@Document(indexName = "atguigu",type = "book")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Book {
     private Integer id;
-    private String bookName;
+    public String bookName = "1";
     private String author;
 
 }

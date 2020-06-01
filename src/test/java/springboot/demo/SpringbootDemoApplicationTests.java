@@ -5,17 +5,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.Index;
 import io.searchbox.core.Search;
 import io.searchbox.core.SearchResult;
-import io.swagger.models.auth.In;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -24,26 +17,24 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import springboot.demo.annotation.FruitInfoUtil;
 import springboot.demo.bean.Apple;
 import springboot.demo.bean.Apple1;
 import springboot.demo.bean.Article;
 import springboot.demo.bean.User;
-import springboot.demo.elasticsearch.BookRepository;
 import springboot.demo.mapper.UserMapper;
 import springboot.demo.service.AsyncService;
 import springboot.demo.service.IMessageProducerMQService;
 import springboot.demo.service.UserService;
-import springboot.demo.util.MatrixToImageWriter;
 import springboot.demo.util.MultiThreadUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.security.Key;
-import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -69,9 +60,14 @@ public class SpringbootDemoApplicationTests {
     @Autowired
     JestClient jestClient;
     @Autowired
-    BookRepository bookRepository;
-    @Autowired
     IMessageProducerMQService iMessageProducerMQService;
+    private Month month;
+
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    RedisTemplate<String, HashMap<String, String>> redisTemplate;
 
     @Test
     public void contextLoads() {
@@ -85,6 +81,13 @@ public class SpringbootDemoApplicationTests {
         List<Integer> ids = Arrays.stream(a).boxed().collect(Collectors.toList());
         List<User> users = userMapper.selectBatchIds(ids);
         System.out.println(users);*/
+        try {
+            Class aClass = Class.forName("springboot.demo.bean.User");
+            Object o = aClass.newInstance();
+
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+        }
     }
 
      /*@Test
@@ -487,10 +490,10 @@ public class SpringbootDemoApplicationTests {
         list1.add("4444");
         list1.add("5555");
         list1.add("1111");
+        Set<List<String>> singleton = Collections.singleton(list1);
         //去重
         List uniqueStr = list1.stream().distinct().collect(Collectors.toList());
         System.out.println("list1为："+JSON.toJSONString(uniqueStr));
-
         List<String> list2 = new ArrayList();
         list2.add("3333");
         list2.add("4444");
@@ -498,10 +501,73 @@ public class SpringbootDemoApplicationTests {
         List<String> reduce1 = list1.stream().filter(item -> !list2.contains(item)).collect(Collectors.toList());
         System.out.println("---得到差集 reduce1 (list1 - list2)---"+JSON.toJSONString(reduce1));
 
-        User u = new User();
-        User user = u.setSex("男");
-        System.out.println("user为："+JSON.toJSONString(user));
     }
+
+    @Test
+    public void testSet(){
+        String init[] = { "One", "Two", "Three", "One", "Two", "Three" };
+        List list1 = new ArrayList(Arrays.asList(init));
+        List list2 = new ArrayList(Arrays.asList(init));
+        List<List> lists = Collections.singletonList(list1);
+        Set<String> one = Collections.singleton("One");
+        list2.removeAll(one);
+        System.out.println("===========lists1"+JSON.toJSONString(list1));
+        System.out.println("===========lists2"+JSON.toJSONString(list2));
+    }
+
+
+    @Test
+    public void testLock(){
+        Map<String, String> map = new HashMap<>();
+        map.put("1", "1");
+        map.put("1", "1");
+        System.out.println("map={}" + JSON.toJSONString(map));
+        Date date = new Date();
+        LocalDateTime localDateTime = date.toInstant().atZone(ZoneOffset.ofHours(8)).toLocalDateTime();
+        System.out.println("{}=======localDateTime" + localDateTime);
+        //获取毫秒数的时间戳
+        long l = LocalDate.now().atStartOfDay(ZoneOffset.ofHours(8)).toInstant().toEpochMilli();
+        
+        LocalDate localDate = LocalDate.now().plusDays(1);
+        LocalTime localTime = LocalTime.of(2, 0, 0);
+        LocalDateTime tomorrowDate = LocalDateTime.of(localDate, localTime);
+        //获取秒数的时间戳
+        long l1 = tomorrowDate.toEpochSecond(ZoneOffset.of("+8"));
+        long l2 = tomorrowDate.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+        System.out.println("明天的日期: " + tomorrowDate);
+        System.out.println("{}秒数的时间戳：" + l1);
+        System.out.println("{}毫秒数的时间戳：" + l2);
+
+        //距离明天凌晨2点的时间戳
+        LocalDateTime.now().plusDays(1);
+
+
+        //md5加密
+//        String hello = DigestUtils.md5Hex("hello");
+//        System.out.println("{}hello:" + hello);
+//        //
+//        String s = RandomStringUtils.randomAlphabetic(5);
+//        System.out.println("{}s :" + s);
+
+        // 获取当前的日期时间
+        LocalDateTime currentTime = LocalDateTime.now();
+        Timestamp timestamp= Timestamp.valueOf(LocalDateTime.now());
+        System.out.println("当前时间: " + currentTime);
+        System.out.println("当前时间戳: " + l);
+
+        LocalDate date1 = currentTime.toLocalDate();
+        System.out.println("只有年月日: " + date1);
+
+        Month month = currentTime.getMonth();
+        int day = currentTime.getDayOfMonth();
+        int seconds = currentTime.getSecond();
+
+        System.out.println("月: " + month +", 日: " + day +", 秒: " + seconds);
+
+
+    }
+
+
 
     public int getClassCount(int id) {
         try {
@@ -527,7 +593,6 @@ public class SpringbootDemoApplicationTests {
         double b = 2;
         return a+b;
     }
-
 
 
 }

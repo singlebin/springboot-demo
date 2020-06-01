@@ -2,9 +2,10 @@ package springboot.demo.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.ibatis.javassist.expr.NewExpr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import springboot.demo.bean.User;
 import springboot.demo.mapper.UserMapper;
 import springboot.demo.service.UserService;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
  * @Date: 2019/1/23 10:08
  */
 @Service
+@Transactional(propagation = Propagation.REQUIRED)
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Autowired

@@ -1,6 +1,7 @@
 package springboot.demo.bean;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,6 +12,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
+@AllArgsConstructor
 public class User {
     @Excel(name = "id" ,orderNum = "0")
     private Integer id;

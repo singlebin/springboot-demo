@@ -17,7 +17,7 @@ public class MySecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
 
-//        http.authorizeRequests().antMatchers("/").permitAll()
-//                .antMatchers()
+        http.authorizeRequests().antMatchers("/").permitAll()
+                .antMatchers("/level1").hasRole("vip1");
     }
 }
